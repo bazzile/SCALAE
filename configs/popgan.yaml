@@ -1,0 +1,38 @@
+ # Config for training ALAE on Sentinel2 RGB conditioned on population mask - resolution 1024x1024
+
+NAME: popgan
+DATASET:
+  ORIGINAL_SOURCE_PATH: /data/mestostacks/ #Channels: blue, green, red, infrared, pop_2000, pop_2015
+  PART_COUNT: 16
+  SIZE: 10000
+  PATH: /data/mestostacks_tfrecords_norm/train/mestostacks-r%02d.tfrecords.%03d
+
+  PART_COUNT_TEST: 1
+  SIZE_TEST: 4
+  PATH_TEST: /data/mestostacks_tfrecords_norm/valid/mestostacks-r%02d.tfrecords.%03d
+
+  SAMPLES_PATH: ""
+  STYLE_MIX_PATH: style_mixing/test_images/mestostacks
+
+  MAX_RESOLUTION_LEVEL: 10
+MODEL:
+  LATENT_SPACE_SIZE: 512
+  LAYER_COUNT: 9
+  MAX_CHANNEL_COUNT: 512
+  START_CHANNEL_COUNT: 16
+  DLATENT_AVG_BETA: 0.995
+  MAPPING_LAYERS: 8
+OUTPUT_DIR: training_artifacts/popgan
+TRAIN:
+  BASE_LEARNING_RATE: 0.002
+  EPOCHS_PER_LOD: 16
+  LEARNING_DECAY_RATE: 0.1
+  LEARNING_DECAY_STEPS: []
+  TRAIN_EPOCHS: 300
+  #                    4    8   16    32    64    128    256
+  LOD_2_BATCH_8GPU: [512, 256, 128,   64,   32,    32,    32,       32,        32] # If GPU memory ~16GB reduce last number from 32 to 24
+  LOD_2_BATCH_4GPU: [512, 256, 128,   64,   32,    32,    32,       32,        16]
+  LOD_2_BATCH_2GPU: [512, 256, 128,   64,   32,    32,    16]
+  LOD_2_BATCH_1GPU: [512, 256, 128,   64,   32,    16]
+
+  LEARNING_RATES: [0.0015,  0.0015,   0.0015,   0.0015,  0.0015,   0.0015,     0.002,     0.003,    0.003]

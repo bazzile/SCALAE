@@ -14,6 +14,7 @@
 # ==============================================================================
 
 import os
+import logging
 from torch import nn
 import torch
 import utils
@@ -40,8 +41,12 @@ class Checkpointer(object):
         self.models = models
         self.auxiliary = auxiliary
         self.cfg = cfg
-        self.logger = logger
         self._save = save
+        
+        if logger is None:
+            self.logger = logging.getLogger("logger")
+        else:
+            self.logger = logger
 
     def save(self, _name, **kwargs):
         if not self._save:

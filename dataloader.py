@@ -77,17 +77,11 @@ class TFRecordsDataset:
 
         img_size = 2 ** lod
 
-        if self.needs_labels:
-            self.features = {
-                # 'shape': db.FixedLenFeature([3], db.int64),
-                'data': db.FixedLenFeature([self.channels, img_size, img_size], db.uint8),
-                'label': db.FixedLenFeature([], db.int64)
-            }
-        else:
-            self.features = {
-                # 'shape': db.FixedLenFeature([3], db.int64),
-                'data': db.FixedLenFeature([self.channels, img_size, img_size], db.uint8)
-            }
+        self.features = {
+            # 'shape': db.FixedLenFeature([3], db.int64),
+            'rgb': db.FixedLenFeature([self.channels, img_size, img_size], db.uint8),
+            'pop': db.FixedLenFeature([1, img_size, img_size], db.uint8)
+        }
 
         buffer_size = self.buffer_size_b // (self.channels * img_size * img_size)
 
@@ -117,14 +111,21 @@ def make_dataloader(cfg, logger, dataset, GPU_batch_size, local_rank, numpy=Fals
 
         def __call__(self, batch):
             with torch.no_grad():
-                x, = batch
+                x, pop = batch
                 if self.flip:
                     flips = [(slice(None, None, None), slice(None, None, None), slice(None, None, random.choice([-1, None]))) for _ in range(x.shape[0])]
                     x = np.array([img[flip] for img, flip in zip(x, flips)])
+                    pop = np.array([img[flip] for img, flip in zip(pop, flips)])
+                    
+                pop_fake_1 = np.rot90(pop, 1, (2, 3)).copy()
+                pop_fake_2 = np.rot90(pop, 3, (2, 3)).copy()
                 if self.numpy:
-                    return x
+                    return x, pop, pop_fake_1, pop_fake_2
                 x = torch.tensor(x, requires_grad=True, device=torch.device(self.device), dtype=torch.float32)
-                return x
+                pop = torch.tensor(pop, requires_grad=True, device=torch.device(self.device), dtype=torch.float32)
+                pop_fake_1 = torch.tensor(pop_fake_1, requires_grad=True, device=torch.device(self.device), dtype=torch.float32)
+                pop_fake_2 = torch.tensor(pop_fake_2, requires_grad=True, device=torch.device(self.device), dtype=torch.float32)
+                return x, pop, pop_fake_1, pop_fake_2
 
     batches = db.data_loader(iter(dataset), BatchCollator(local_rank), len(dataset) // GPU_batch_size)
 

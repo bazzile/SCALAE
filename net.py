@@ -29,9 +29,21 @@ def pixel_norm(x, epsilon=1e-8):
     return x * torch.rsqrt(torch.mean(x.pow(2.0), dim=1, keepdim=True) + epsilon)
 
 
-def style_mod(x, style):
-    style = style.view(style.shape[0], 2, x.shape[1], 1, 1)
-    return torch.addcmul(style[:, 1], value=1.0, tensor1=x, tensor2=style[:, 0] + 1)
+def style_mod(x, style, popmap):
+    b = x.shape[0]
+    c = x.shape[1]
+    h = x.shape[2]
+    w = x.shape[3]
+    
+    style = style.unsqueeze(2).unsqueeze(3)
+
+    style_add = style[:, c:].repeat(1, 1, h, w)
+    style_mult = style[:, :c].repeat(1, 1, h, w)
+    
+    style_add = style_add + popmap[:, c:]
+    style_mult = style_mult + popmap[:, :c]
+    
+    return torch.addcmul(style_add, value=1.0, tensor1=x, tensor2=style_mult + 1)
 
 
 def upscale2d(x, factor=2):
@@ -187,6 +199,7 @@ class DecodeBlock(nn.Module):
         self.bias_1 = nn.Parameter(torch.Tensor(1, outputs, 1, 1))
         self.instance_norm_1 = nn.InstanceNorm2d(outputs, affine=False, eps=1e-8)
         self.style_1 = ln.Linear(latent_size, 2 * outputs, gain=1)
+        self.popmap_1 = ln.Conv2d(1, 2 * outputs, 3, 1, 1, bias=False)
 
         self.conv_2 = ln.Conv2d(outputs, outputs, 3, 1, 1, bias=False)
         self.noise_weight_2 = nn.Parameter(torch.Tensor(1, outputs, 1, 1))
@@ -194,6 +207,7 @@ class DecodeBlock(nn.Module):
         self.bias_2 = nn.Parameter(torch.Tensor(1, outputs, 1, 1))
         self.instance_norm_2 = nn.InstanceNorm2d(outputs, affine=False, eps=1e-8)
         self.style_2 = ln.Linear(latent_size, 2 * outputs, gain=1)
+        self.popmap_2 = ln.Conv2d(1, 2 * outputs, 3, 1, 1, bias=False)
 
         self.layer = layer
 
@@ -201,20 +215,26 @@ class DecodeBlock(nn.Module):
             self.bias_1.zero_()
             self.bias_2.zero_()
 
-    def forward(self, x, s1, s2, noise):
+    def forward(self, x, s1, s2, popmap, noise):
         if self.has_first_conv:
             if not self.fused_scale:
                 x = upscale2d(x)
             x = self.conv_1(x)
             x = self.blur(x)
 
-        if noise:
+        if isinstance(noise, bool) and noise:
             if noise == 'batch_constant':
-                x = torch.addcmul(x, value=1.0, tensor1=self.noise_weight_1,
-                                  tensor2=torch.randn([1, 1, x.shape[2], x.shape[3]]))
+                x = torch.addcmul(x, value=1.0, tensor1=self.noise_weight_1.to(x.device),
+                                  tensor2=torch.randn([1, 1, x.shape[2], x.shape[3]]).to(x.device))
             else:
-                x = torch.addcmul(x, value=1.0, tensor1=self.noise_weight_1,
-                                  tensor2=torch.randn([x.shape[0], 1, x.shape[2], x.shape[3]]))
+                x = torch.addcmul(x, value=1.0, tensor1=self.noise_weight_1.to(x.device),
+                                  tensor2=torch.randn([x.shape[0], 1, x.shape[2], x.shape[3]]).to(x.device))
+        elif isinstance(noise, int):
+            x = torch.addcmul(x, value=1.0, tensor1=self.noise_weight_1.to(x.device),
+                              tensor2=torch.randn([x.shape[0], 1, x.shape[2], x.shape[3]]).to(x.device))
+        elif isinstance(noise, list):
+            x = torch.addcmul(x, value=1.0, tensor1=self.noise_weight_1.to(x.device),
+                              tensor2=noise[int(math.log(x.shape[2], 2))].to(x.device))
         else:
             s = math.pow(self.layer + 1, 0.5)
             x = x + s * torch.exp(-x * x / (2.0 * s * s)) / math.sqrt(2 * math.pi) * 0.8
@@ -223,18 +243,27 @@ class DecodeBlock(nn.Module):
         x = F.leaky_relu(x, 0.2)
 
         x = self.instance_norm_1(x)
-
-        x = style_mod(x, self.style_1(s1))
+        
+        
+        popmap_1 = popmap
+        while popmap_1.shape[2] > x.shape[2]:
+            popmap_1 = F.avg_pool2d(popmap_1, 2, 2)
+        popmap_1 = self.popmap_1(popmap_1)
+        
+        x = style_mod(x, self.style_1(s1), popmap_1)
 
         x = self.conv_2(x)
 
-        if noise:
+        if isinstance(noise, bool) and noise:
             if noise == 'batch_constant':
-                x = torch.addcmul(x, value=1.0, tensor1=self.noise_weight_2,
-                                  tensor2=torch.randn([1, 1, x.shape[2], x.shape[3]]))
+                x = torch.addcmul(x, value=1.0, tensor1=self.noise_weight_2.to(x.device),
+                                  tensor2=torch.randn([1, 1, x.shape[2], x.shape[3]]).to(x.device))
             else:
-                x = torch.addcmul(x, value=1.0, tensor1=self.noise_weight_2,
-                                  tensor2=torch.randn([x.shape[0], 1, x.shape[2], x.shape[3]]))
+                x = torch.addcmul(x, value=1.0, tensor1=self.noise_weight_2.to(x.device),
+                                  tensor2=torch.randn([x.shape[0], 1, x.shape[2], x.shape[3]]).to(x.device))
+        elif isinstance(noise, list):
+            x = torch.addcmul(x, value=1.0, tensor1=self.noise_weight_1.to(x.device),
+                              tensor2=noise[int(math.log(x.shape[2], 2))].to(x.device))
         else:
             s = math.pow(self.layer + 1, 0.5)
             x = x +  s * torch.exp(-x * x / (2.0 * s * s)) / math.sqrt(2 * math.pi) * 0.8
@@ -244,7 +273,12 @@ class DecodeBlock(nn.Module):
         x = F.leaky_relu(x, 0.2)
         x = self.instance_norm_2(x)
 
-        x = style_mod(x, self.style_2(s2))
+        popmap_2 = popmap
+        while popmap_2.shape[2] > x.shape[2]:
+                popmap_2 = F.avg_pool2d(popmap_2, 2, 2)
+        popmap_2 = self.popmap_2(popmap_2)
+        
+        x = style_mod(x, self.style_2(s2), popmap_2)
 
         return x
 
@@ -308,6 +342,7 @@ class Encoder_old(nn.Module):
 
     def encode(self, x, lod):
         styles = torch.zeros(x.shape[0], 1, self.latent_size)
+        styles = styles.to(x.device)
 
         x = self.from_rgb[self.layer_count - lod - 1](x)
         x = F.leaky_relu(x, 0.2)
@@ -321,6 +356,7 @@ class Encoder_old(nn.Module):
     def encode2(self, x, lod, blend):
         x_orig = x
         styles = torch.zeros(x.shape[0], 1, self.latent_size)
+        styles = styles.to(x.device)
 
         x = self.from_rgb[self.layer_count - lod - 1](x)
         x = F.leaky_relu(x, 0.2)
@@ -398,7 +434,8 @@ class EncoderWithFC(nn.Module):
 
     def encode(self, x, lod):
         styles = torch.zeros(x.shape[0], 1, self.latent_size)
-
+        styles = styles.to(x.device)
+        
         x = self.from_rgb[self.layer_count - lod - 1](x)
         x = F.leaky_relu(x, 0.2)
 
@@ -411,6 +448,7 @@ class EncoderWithFC(nn.Module):
     def encode2(self, x, lod, blend):
         x_orig = x
         styles = torch.zeros(x.shape[0], 1, self.latent_size)
+        styles = styles.to(x.device)
 
         x = self.from_rgb[self.layer_count - lod - 1](x)
         x = F.leaky_relu(x, 0.2)
@@ -486,6 +524,7 @@ class Encoder(nn.Module):
 
     def encode(self, x, lod):
         styles = torch.zeros(x.shape[0], 1, self.latent_size)
+        styles = styles.to(x.device)
 
         x = self.from_rgb[self.layer_count - lod - 1](x)
         x = F.leaky_relu(x, 0.2)
@@ -499,6 +538,7 @@ class Encoder(nn.Module):
     def encode2(self, x, lod, blend):
         x_orig = x
         styles = torch.zeros(x.shape[0], 1, self.latent_size)
+        styles = styles.to(x.device)
 
         x = self.from_rgb[self.layer_count - lod - 1](x)
         x = F.leaky_relu(x, 0.2)
@@ -702,7 +742,7 @@ class Generator(nn.Module):
         self.decode_block: nn.ModuleList[DecodeBlock] = nn.ModuleList()
         for i in range(self.layer_count):
             outputs = min(self.maxf, startf * mul)
-
+            
             has_first_conv = i != 0
             fused_scale = resolution * 2 >= 128
 
@@ -723,24 +763,24 @@ class Generator(nn.Module):
 
         self.to_rgb = to_rgb
 
-    def decode(self, styles, lod, noise):
+    def decode(self, styles, pop, lod, noise):
         x = self.const
 
         for i in range(lod + 1):
-            x = self.decode_block[i](x, styles[:, 2 * i + 0], styles[:, 2 * i + 1], noise)
+            x = self.decode_block[i](x, styles[:, 2 * i + 0], styles[:, 2 * i + 1], pop, noise)
 
         x = self.to_rgb[lod](x)
         return x
 
-    def decode2(self, styles, lod, blend, noise):
+    def decode2(self, styles, pop, lod, blend, noise):
         x = self.const
 
         for i in range(lod):
-            x = self.decode_block[i](x, styles[:, 2 * i + 0], styles[:, 2 * i + 1], noise)
+            x = self.decode_block[i](x, styles[:, 2 * i + 0], styles[:, 2 * i + 1], pop, noise)
 
         x_prev = self.to_rgb[lod - 1](x)
 
-        x = self.decode_block[lod](x, styles[:, 2 * lod + 0], styles[:, 2 * lod + 1], noise)
+        x = self.decode_block[lod](x, styles[:, 2 * lod + 0], styles[:, 2 * lod + 1], pop, noise)
         x = self.to_rgb[lod](x)
 
         needed_resolution = self.layer_to_resolution[lod]
@@ -750,11 +790,11 @@ class Generator(nn.Module):
 
         return x
 
-    def forward(self, styles, lod, blend, noise):
+    def forward(self, styles, pop, lod, blend, noise):
         if blend == 1:
-            return self.decode(styles, lod, noise)
+            return self.decode(styles, pop, lod, noise)
         else:
-            return self.decode2(styles, lod, blend, noise)
+            return self.decode2(styles, pop, lod, blend, noise)
 
     def get_statistics(self, lod):
         rgb_std = self.to_rgb[lod].to_rgb.weight.std().item()
