@@ -1,4 +1,4 @@
- # Config for training ALAE on Sentinel2 RGB conditioned on population mask - resolution 1024x1024
+ # Config for training SCALAE on Sentinel2 RGB conditioned on population mask - resolution 1024x1024
 
 NAME: popgan
 DATASET:
