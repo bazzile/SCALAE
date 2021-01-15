@@ -3,7 +3,7 @@
 Training and evaluation code for our paper: **Formatting the Landscape: Spatial conditional GAN
 for varying population in satellite imagery**
 
-Arxiv link: [TODO](https://tinyurl.com/y2xa92t4)
+Arxiv link: [TODO](https://arxiv.org/abs/2101.05069)
 
 [Interactive colab](https://tinyurl.com/y2xa92t4)
 
