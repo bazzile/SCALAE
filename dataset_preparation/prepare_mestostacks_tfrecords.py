@@ -1,3 +1,4 @@
+from pathlib import Path
 import zipfile
 import tqdm
 from defaults import get_cfg_defaults
@@ -53,9 +54,9 @@ def prepare_dataset(cfg, logger, train=True):
     # Please refer to this page: https://github.com/suvojit-0x55aa/celebA-HQ-dataset-download
     # You can get pre-generated dataset from: https://drive.google.com/drive/folders/11Vz0fqHS2rXDb5pprgTjpD7S2BAJhi1P
     source_path = cfg.DATASET.ORIGINAL_SOURCE_PATH
-    for i, filename in tqdm.tqdm(enumerate(os.listdir(source_path))):
-        if filename.endswith('.tif'):
-            images.append((filename, filename))
+    for i, file_path in tqdm.tqdm(enumerate(Path(source_path).rglob('*.tif'))):
+        file_name = file_path.name
+        images.append((file_name, file_path))
 
     print("Total count: %d" % len(images))
     if train:
@@ -97,8 +98,8 @@ def prepare_dataset(cfg, logger, train=True):
             tfr_writer = tf.python_io.TFRecordWriter(part_path, tfr_opt)
             writers[lod] = tfr_writer
 
-        for label, filename in tqdm.tqdm(celeba_folds[i]):
-            images = parse_tif_file(os.path.join(source_path, filename), {'rgb': [3,2,1], 'pop': [4]})
+        for file_name, file_path in tqdm.tqdm(celeba_folds[i]):
+            images = parse_tif_file(file_path, {'rgb': [3,2,1], 'pop': [4]})
             for k in images.keys():
                 if k == 'pop':
                     images[k] = np.clip(images[k].astype(np.uint8), 0, 255)

@@ -2,14 +2,14 @@
 
 NAME: popgan
 DATASET:
-  ORIGINAL_SOURCE_PATH: /content/drive/MyDrive/data/mestostacks/ #Channels: blue, green, red, infrared, pop
+  ORIGINAL_SOURCE_PATH: /data/mestostacks/ #Channels: blue, green, red, infrared, pop
   PART_COUNT: 16
   SIZE: 10000
-  PATH: /content/drive/MyDrive/data/mestostacks_tfrecords_norm/train/mestostacks-r%02d.tfrecords.%03d
+  PATH: /data/mestostacks_tfrecords_norm/train/mestostacks-r%02d.tfrecords.%03d
 
   PART_COUNT_TEST: 1
   SIZE_TEST: 4
-  PATH_TEST: /content/drive/MyDrive/data/mestostacks_tfrecords_norm/valid/mestostacks-r%02d.tfrecords.%03d
+  PATH_TEST: /data/mestostacks_tfrecords_norm/valid/mestostacks-r%02d.tfrecords.%03d
 
   SAMPLES_PATH: ""
   STYLE_MIX_PATH: style_mixing/test_images/mestostacks

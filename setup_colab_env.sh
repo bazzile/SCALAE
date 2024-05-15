@@ -25,3 +25,9 @@ ln -s /usr/local/lib/python3.10/dist-packages/google \
 # IPython no longer exposes traitlets like this, it's a separate package now
 sed -i "s/from IPython.utils import traitlets as _traitlets/import traitlets as _traitlets/" /usr/local/lib/python3.8/dist-packages/google/colab/*.py
 sed -i "s/from IPython.utils import traitlets/import traitlets/" /usr/local/lib/python3.8/dist-packages/google/colab/*.py
+
+
+# !git clone https://github.com/bazzile/SCALAE.git && cd SCALAE && git checkout dev
+# %cd SCALAE
+# !chmod +x setup_colab_env.sh && ./setup_colab_env.sh && pip install -r requirements.txt
+# !mkdir /data && ln -s /content/drive/MyDrive/scalae_project/data/* /data
