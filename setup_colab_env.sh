@@ -33,3 +33,12 @@ sed -i "s/from IPython.utils import traitlets/import traitlets/" /usr/local/lib/
 # !apt install gdal-bin
 # MOUNT DRIVE
 # !mkdir /data && ln -s /content/drive/MyDrive/scalae_project/data/* /data
+
+
+
+# prepare
+# !pip install yacs tqdm scikit-image tensorflow
+# !apt install gdal-bin
+# %cd SCALAE
+# !export PYTHONPATH="${PYTHONPATH}:/content/SCALAE" && \
+# python dataset_preparation/prepare_mestostacks_tfrecords.py

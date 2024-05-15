@@ -54,7 +54,6 @@ def prepare_dataset(cfg, logger, train=True):
     # Please refer to this page: https://github.com/suvojit-0x55aa/celebA-HQ-dataset-download
     # You can get pre-generated dataset from: https://drive.google.com/drive/folders/11Vz0fqHS2rXDb5pprgTjpD7S2BAJhi1P
     source_path = cfg.DATASET.ORIGINAL_SOURCE_PATH
-    source_path = Path(source_path).resolve()
     for i, file_path in tqdm.tqdm(enumerate(Path(source_path).rglob('*.tif'))):
         file_name = file_path.name
         images.append((file_name, str(file_path)))
