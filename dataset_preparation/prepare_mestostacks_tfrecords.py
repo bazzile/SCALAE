@@ -16,7 +16,7 @@ import os
 import tensorflow as tf
 import imageio
 from PIL import Image, ImageEnhance
-import gdal
+from osgeo import gdal
 
 def log_norm_pop(pop_batch):
     pop_batch = np.log(pop_batch)

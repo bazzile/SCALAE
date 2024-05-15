@@ -30,4 +30,6 @@ sed -i "s/from IPython.utils import traitlets/import traitlets/" /usr/local/lib/
 # !git clone https://github.com/bazzile/SCALAE.git && cd SCALAE && git checkout dev
 # %cd SCALAE
 # !chmod +x setup_colab_env.sh && ./setup_colab_env.sh && pip install -r requirements.txt
+# !apt install gdal-bin
+# MOUNT DRIVE
 # !mkdir /data && ln -s /content/drive/MyDrive/scalae_project/data/* /data
