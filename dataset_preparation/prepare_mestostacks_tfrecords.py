@@ -98,14 +98,13 @@ def prepare_dataset(cfg, logger, train=True):
             writers[lod] = tfr_writer
 
         for label, filename in tqdm.tqdm(celeba_folds[i]):
-            images = parse_tif_file(os.path.join(source_path, filename), {'rgb': [3,2,1], 'pop': [6]})
+            images = parse_tif_file(os.path.join(source_path, filename), {'rgb': [3,2,1], 'pop': [4]})
             for k in images.keys():
                 if k == 'pop':
-                    images[k] = log_norm_pop(images[k])
-                    images[k] = np.clip((images[k]*255).astype(np.uint8), 0, 255)
+                    images[k] = np.clip(images[k].astype(np.uint8), 0, 255)
                     images[k] = Image.fromarray(images[k])
                 elif k == 'rgb':
-                    images[k] = np.clip((images[k]*255).astype(np.uint8), 0, 255)
+                    images[k] = np.clip(images[k].astype(np.uint8), 0, 255)
                     images[k] = Image.fromarray(images[k])
                     images[k] = ImageEnhance.Brightness(images[k]).enhance(1.4)
                     images[k] = ImageEnhance.Contrast(images[k]).enhance(1.4)
