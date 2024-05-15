@@ -92,10 +92,12 @@ def prepare_dataset(cfg, logger, train=True):
 
         writers = {}
         for lod in range(cfg.DATASET.MAX_RESOLUTION_LEVEL, 1, -1):
-            tfr_opt = tf.python_io.TFRecordOptions(tf.python_io.TFRecordCompressionType.NONE)
+            # tfr_opt = tf.python_io.TFRecordOptions(tf.python_io.TFRecordCompressionType.NONE)
+            tfr_opt = tf.compat.v1.python_io.TFRecordOptions(tf.python_io.TFRecordCompressionType.NONE)
             part_path = path % (lod, i)
             os.makedirs(os.path.dirname(part_path), exist_ok=True)
-            tfr_writer = tf.python_io.TFRecordWriter(part_path, tfr_opt)
+            # tfr_writer = tf.python_io.TFRecordWriter(part_path, tfr_opt)
+            tfr_writer = tf.compat.v1.python_io.TFRecordWriter(part_path, tfr_opt)
             writers[lod] = tfr_writer
 
         for file_name, file_path in tqdm.tqdm(celeba_folds[i]):
