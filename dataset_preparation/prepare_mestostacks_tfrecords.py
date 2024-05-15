@@ -57,7 +57,7 @@ def prepare_dataset(cfg, logger, train=True):
     source_path = Path(source_path).resolve()
     for i, file_path in tqdm.tqdm(enumerate(Path(source_path).rglob('*.tif'))):
         file_name = file_path.name
-        images.append((file_name, file_path))
+        images.append((file_name, str(file_path)))
 
     print("Total count: %d" % len(images))
     if train:
