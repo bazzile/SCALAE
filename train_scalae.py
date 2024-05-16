@@ -355,5 +355,5 @@ if __name__ == "__main__":
     while gpu_count not in [1, 2, 4, 8]:
         gpu_count -= 1
     print(f"Starting training on {gpu_count} GPUs out of totally {torch.cuda.device_count()} GPUs visible")
-    run(train, get_cfg_defaults(), description='StyleGAN', default_config='configs/ffhq.yaml',
+    run(train, get_cfg_defaults(), description='StyleGAN', default_config='configs/popgan.yaml',
         world_size=gpu_count)

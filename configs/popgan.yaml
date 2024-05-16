@@ -12,7 +12,7 @@ DATASET:
   PATH_TEST: /content/drive/MyDrive/scalae_project/data/mestostacks_tfrecords_norm/valid/mestostacks-r%02d.tfrecords.%03d
 
   SAMPLES_PATH: ""
-  STYLE_MIX_PATH: style_mixing/test_images/mestostacks
+  STYLE_MIX_PATH: /content/drive/MyDrive/scalae_project/style_mixing/test_images/mestostacks
 
   MAX_RESOLUTION_LEVEL: 10
 MODEL:
@@ -22,7 +22,7 @@ MODEL:
   START_CHANNEL_COUNT: 16
   DLATENT_AVG_BETA: 0.995
   MAPPING_LAYERS: 8
-OUTPUT_DIR: training_artifacts/popgan
+OUTPUT_DIR: /content/drive/MyDrive/scalae_project/training_artifacts/popgan
 TRAIN:
   BASE_LEARNING_RATE: 0.002
   EPOCHS_PER_LOD: 16
