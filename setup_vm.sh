@@ -2,7 +2,7 @@
 
 # Update and upgrade the system
 sudo apt update
-sudo apt upgrade -y
+# sudo apt upgrade -y
 
 # Install Python 3.8 and necessary Python tools
 sudo apt install -y python3.8 python3.8-venv python3.8-dev python3-pip git s3fs
