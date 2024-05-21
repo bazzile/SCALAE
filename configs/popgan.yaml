@@ -5,7 +5,7 @@ DATASET:
   ORIGINAL_SOURCE_PATH: /content/drive/MyDrive/scalae_project/data/mestostacks/ #Channels: blue, green, red, infrared, pop
   PART_COUNT: 16
   SIZE: 10000
-  PATH: ~/s3/mestostacks/mestostacks-r%02d.tfrecords.%03d
+  PATH: /home/vasily/s3/mestostacks/mestostacks-r%02d.tfrecords.%03d
 
   PART_COUNT_TEST: 1
   SIZE_TEST: 4
@@ -22,7 +22,7 @@ MODEL:
   START_CHANNEL_COUNT: 16
   DLATENT_AVG_BETA: 0.995
   MAPPING_LAYERS: 8
-OUTPUT_DIR: ~/s3/training-results
+OUTPUT_DIR: /home/vasily/s3/training-results
 TRAIN:
   BASE_LEARNING_RATE: 0.002
   EPOCHS_PER_LOD: 16
