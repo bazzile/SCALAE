@@ -28,7 +28,7 @@ TRAIN:
   EPOCHS_PER_LOD: 16
   LEARNING_DECAY_RATE: 0.1
   LEARNING_DECAY_STEPS: []
-  TRAIN_EPOCHS: 30
+  TRAIN_EPOCHS: 330
   #                    4    8   16    32    64    128    256
   LOD_2_BATCH_8GPU: [512, 256, 128,   64,   32,    32,    32,       32,        32] # If GPU memory ~16GB reduce last number from 32 to 24
   LOD_2_BATCH_4GPU: [512, 256, 128,   64,   32,    32,    32,       32,        16]
