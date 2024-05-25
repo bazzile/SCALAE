@@ -272,8 +272,10 @@ def train(cfg, logger, local_rank, world_size, distributed):
 
         i = 0
         for x_orig, pop_orig, pop_fake_1, pop_fake_2 in tqdm(batches):
+            logger.info('start')
             i += 1
             with torch.no_grad():
+                logger.info('with')
                 if x_orig.shape[0] != lod2batch.get_per_GPU_batch_size():
                     continue
                 if need_permute:
@@ -303,6 +305,8 @@ def train(cfg, logger, local_rank, world_size, distributed):
             x.requires_grad = True
             pop.requires_grad = True
 
+            logger.info('steps')
+
             encoder_optimizer.zero_grad()
             loss_d = model(x, pop, lod2batch.lod, blend_factor, d_train=True, ae=False)
             tracker.update(dict(loss_d=loss_d))
@@ -331,6 +335,7 @@ def train(cfg, logger, local_rank, world_size, distributed):
             per_epoch_ptime = epoch_end_time - epoch_start_time
 
             lod_for_saving_model = lod2batch.lod
+            logger.info('l2bstep')
             lod2batch.step()
             if local_rank == 0:
                 if lod2batch.is_time_to_save():
@@ -339,6 +344,7 @@ def train(cfg, logger, local_rank, world_size, distributed):
                     save_sample(lod2batch, tracker, sample, sample_pop, samplez, x, logger, model_s, cfg, encoder_optimizer,
                                 decoder_optimizer)
 
+        logger.info('sched step')
         scheduler.step()
 
         if local_rank == 0:
