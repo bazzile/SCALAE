@@ -2,17 +2,18 @@
 
 NAME: popgan
 DATASET:
-  ORIGINAL_SOURCE_PATH: "" #Channels: blue, green, red, infrared, pop
+  ORIGINAL_SOURCE_PATH: /content/drive/MyDrive/scalae_project/data/mestostacks/ #Channels: blue, green, red, infrared, pop
   PART_COUNT: 16
   SIZE: 10000
-  PATH: /home/vasily/SCALAE/data/mestostacks-r%02d.tfrecords.%03d
+  PATH: /home/vasily/s3/mestostacks/mestostacks-r%02d.tfrecords.%03d
 
   PART_COUNT_TEST: 1
   SIZE_TEST: 4
-  PATH_TEST: ""
+  PATH_TEST: /content/drive/MyDrive/scalae_project/data/mestostacks_tfrecords_norm/valid/mestostacks-r%02d.tfrecords.%03d
 
   SAMPLES_PATH: ""
-  STYLE_MIX_PATH: ""
+  STYLE_MIX_PATH: /content/drive/MyDrive/scalae_project/style_mixing/test_images/mestostacks
+
   MAX_RESOLUTION_LEVEL: 10
 MODEL:
   LATENT_SPACE_SIZE: 512
@@ -27,7 +28,7 @@ TRAIN:
   EPOCHS_PER_LOD: 16
   LEARNING_DECAY_RATE: 0.1
   LEARNING_DECAY_STEPS: []
-  TRAIN_EPOCHS: 16
+  TRAIN_EPOCHS: 330
   #                    4    8   16    32    64    128    256
   LOD_2_BATCH_8GPU: [512, 256, 128,   64,   32,    32,    32,       32,        32] # If GPU memory ~16GB reduce last number from 32 to 24
   LOD_2_BATCH_4GPU: [512, 256, 128,   64,   32,    32,    32,       32,        16]
