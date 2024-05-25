@@ -1,3 +1,4 @@
+dareblopy 
 packaging
 imageio
 numpy
@@ -7,6 +8,6 @@ dlutils
 bimpy
 torch <= 1.6
 torchvision
-sklearn
+scikit-learn
 yacs
 matplotlib
