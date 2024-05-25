@@ -1,10 +1,12 @@
-dareblopy 
-dlutils 
-matplotlib
-scikit-image 
-scikit-learn 
-tensorflow==2.13.0
-torch==1.6.0 
-torchvision==0.7.0
-tqdm 
+packaging
+imageio
+numpy
+scipy
+tqdm
+dlutils
+bimpy
+torch <= 1.6
+torchvision
+sklearn
 yacs
+matplotlib
