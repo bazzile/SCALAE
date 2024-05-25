@@ -313,11 +313,15 @@ def train(cfg, logger, local_rank, world_size, distributed):
             loss_d.backward()
             encoder_optimizer.step()
 
+            logger.info('stepsE')
+
             decoder_optimizer.zero_grad()
             loss_g = model(x, pop_fake_1, lod2batch.lod, blend_factor, d_train=False, ae=False)
             tracker.update(dict(loss_g=loss_g))
             loss_g.backward()
             decoder_optimizer.step()
+
+            logger.info('stepD')
 
             encoder_optimizer.zero_grad()
             decoder_optimizer.zero_grad()
@@ -326,6 +330,8 @@ def train(cfg, logger, local_rank, world_size, distributed):
             (lae).backward()
             encoder_optimizer.step()
             decoder_optimizer.step()
+
+            logger.info('stepL')
 
             if local_rank == 0:
                 betta = 0.5 ** (lod2batch.get_batch_size() / (10 * 1000.0))
