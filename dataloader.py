@@ -18,7 +18,7 @@ import random
 
 import numpy as np
 import torch
-import torch.tensor
+from torch import Tensor
 import torch.utils
 import torch.utils.data
 import time
@@ -121,10 +121,10 @@ def make_dataloader(cfg, logger, dataset, GPU_batch_size, local_rank, numpy=Fals
                 pop_fake_2 = np.rot90(pop, 3, (2, 3)).copy()
                 if self.numpy:
                     return x, pop, pop_fake_1, pop_fake_2
-                x = torch.tensor(x, requires_grad=True, device=torch.device(self.device), dtype=torch.float32)
-                pop = torch.tensor(pop, requires_grad=True, device=torch.device(self.device), dtype=torch.float32)
-                pop_fake_1 = torch.tensor(pop_fake_1, requires_grad=True, device=torch.device(self.device), dtype=torch.float32)
-                pop_fake_2 = torch.tensor(pop_fake_2, requires_grad=True, device=torch.device(self.device), dtype=torch.float32)
+                x = Tensor(x, requires_grad=True, device=torch.device(self.device), dtype=torch.float32)
+                pop = Tensor(pop, requires_grad=True, device=torch.device(self.device), dtype=torch.float32)
+                pop_fake_1 = Tensor(pop_fake_1, requires_grad=True, device=torch.device(self.device), dtype=torch.float32)
+                pop_fake_2 = Tensor(pop_fake_2, requires_grad=True, device=torch.device(self.device), dtype=torch.float32)
                 return x, pop, pop_fake_1, pop_fake_2
 
     batches = db.data_loader(iter(dataset), BatchCollator(local_rank), len(dataset) // GPU_batch_size)
@@ -144,7 +144,7 @@ def make_dataloader_y(cfg, logger, dataset, GPU_batch_size, local_rank):
                 if self.flip:
                     flips = [(slice(None, None, None), slice(None, None, None), slice(None, None, random.choice([-1, None]))) for _ in range(x.shape[0])]
                     x = np.array([img[flip] for img, flip in zip(x, flips)])
-                x = torch.tensor(x, requires_grad=True, device=torch.device(self.device), dtype=torch.float32)
+                x = Tensor(x, requires_grad=True, device=torch.device(self.device), dtype=torch.float32)
                 return x, y
 
     batches = db.data_loader(iter(dataset), BatchCollator(local_rank), len(dataset) // GPU_batch_size)
@@ -261,7 +261,7 @@ def make_imagenet_dataloader(cfg, logger, dataset, GPU_batch_size, target_size, 
                 if self.flip:
                     flips = [(slice(None, None, None), slice(None, None, None), slice(None, None, random.choice([-1, None]))) for _ in range(x.shape[0])]
                     x = np.array([img[flip] for img, flip in zip(x, flips)])
-                x = torch.tensor(x, requires_grad=True, device=torch.device(self.device), dtype=torch.float32)
+                x = Tensor(x, requires_grad=True, device=torch.device(self.device), dtype=torch.float32)
 
                 return x
 
@@ -298,7 +298,7 @@ def make_imagenet_dataloader_y(cfg, logger, dataset, GPU_batch_size, target_size
                 if self.flip:
                     flips = [(slice(None, None, None), slice(None, None, None), slice(None, None, random.choice([-1, None]))) for _ in range(x.shape[0])]
                     x = np.array([img[flip] for img, flip in zip(x, flips)])
-                x = torch.tensor(x, requires_grad=True, device=torch.device(self.device), dtype=torch.float32)
+                x = Tensor(x, requires_grad=True, device=torch.device(self.device), dtype=torch.float32)
                 return x, y
 
     batches = db.data_loader(iter(dataset), BatchCollator(local_rank), len(dataset) // GPU_batch_size)
