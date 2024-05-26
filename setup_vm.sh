@@ -5,7 +5,9 @@ sudo apt update
 # sudo apt upgrade -y
 
 # Install Python 3.8 and necessary Python tools
-sudo apt install -y python3.8 python3.8-venv python3.8-dev python3-pip git s3fs
+# sudo apt install -y python3.8 python3.8-venv python3.8-dev python3-pip git s3fs
+sudo apt install -y python3-pip git s3fs screen
+python -m pip install --upgrade pip
 
 # Add Python 3.8 to the alternatives system and set it as default
 sudo update-alternatives --install /usr/bin/python3 python3 /usr/bin/python3.8 1
