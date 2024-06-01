@@ -3,7 +3,7 @@
 #install python 3.8 and dev utils
 #you may not need all the dev libraries, but I haven't tested which aren't necessary.
 sudo apt-get update -y
-sudo apt-get install python3.7 python3.7-dev python3.7-distutils libpython3.8-dev
+sudo apt-get install python3.8 python3.8-dev python3.8-distutils libpython3.8-dev
 
 #change alternatives
 sudo update-alternatives --install /usr/bin/python3 python3 /usr/bin/python3.10 1
